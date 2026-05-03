@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Desktop OS Final</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
+body{overflow:hidden}
+
+/* DESKTOP */
+#desktop{
+width:100vw;height:100vh;
+background-size:cover;
+background-position:center;
+transition:1s;
+}
+
+/* ICONS */
+.icon{
+width:80px;text-align:center;color:white;
+position:absolute;cursor:pointer;
+}
+.icon img{width:48px}
+.icon:hover{transform:scale(1.1)}
+
+/* WINDOWS */
+.window{
+width:520px;height:320px;
+background:rgba(20,25,40,.9);
+backdrop-filter:blur(15px);
+color:white;
+position:absolute;
+top:120px;left:200px;
+border-radius:12px;
+display:none;
+z-index:5;
+}
+.titlebar{
+padding:8px;
+background:rgba(255,255,255,.05);
+display:flex;justify-content:space-between;
+cursor:move;
+}
+
+/* TASKBAR */
+.taskbar{
+position:absolute;bottom:0;left:0;width:100%;height:60px;
+background:rgba(20,25,40,.85);
+backdrop-filter:blur(20px);
+display:flex;align-items:center;padding:0 10px;
+gap:10px;
+}
+
+/* SEARCH */
+.search{
+background:#111;border:none;border-radius:10px;
+padding:6px 10px;color:white;width:220px;
+}
+
+/* APPS */
+.apps{display:flex;gap:12px;}
+.apps img{width:32px;cursor:pointer;}
+.apps img:hover{transform:scale(1.2)}
+
+/* RIGHT */
+.right{
+margin-left:auto;
+display:flex;gap:15px;
+color:white;font-size:13px;
+align-items:center;
+}
+
+/* START MENU */
+#startMenu{
+position:absolute;
+bottom:70px;
+left:10px;
+width:320px;
+background:rgba(20,25,40,.95);
+border-radius:12px;
+padding:10px;
+display:none;
+z-index:1000;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+text-align:center;
+}
+
+.grid div{
+padding:10px;
+border-radius:10px;
+cursor:pointer;
+color:white;
+transition:.2s;
+}
+.grid div:hover{background:rgba(255,255,255,.1)}
+.grid img{width:40px}
+
+/* GAME */
+#gameBox{width:100%;height:200px;background:#000;position:relative;}
+.player{width:20px;height:20px;background:red;position:absolute;top:90px;left:90px;}
+
+/* CALC */
+.calc button{
+width:23%;margin:1%;padding:10px;
+background:#333;color:white;border:none;
+}
+
+/* JARVIS */
+#jarvis{
+position:absolute;top:20px;right:20px;color:#00eaff;
+}
+.jarvis-box{
+background:rgba(0,255,255,.08);
+border:1px solid #00eaff;
+padding:10px;border-radius:10px;
+box-shadow:0 0 20px #00eaff;
+}
+
+/* SHUTDOWN */
+#shutdown{
+position:fixed;inset:0;background:black;
+display:none;justify-content:center;align-items:center;
+flex-direction:column;color:white;
+}
+.loader{
+width:50px;height:50px;border:4px solid #333;
+border-top:4px solid white;border-radius:50%;
+animation:spin 1s linear infinite;
+}
+@keyframes spin{100%{transform:rotate(360deg)}}
+</style>
+</head>
+
+<body>
+
+<div id="desktop">
+
+<!-- ICONS -->
+<div class="icon" style="top:40px;left:40px" ondblclick="openApp('chrome')">
+<img src="https://img.icons8.com/color/64/chrome--v1.png"><br>Chrome
+</div>
+
+<div class="icon" style="top:130px;left:40px" ondblclick="openApp('calc')">
+<img src="https://img.icons8.com/color/64/calculator.png"><br>Calc
+</div>
+
+<div class="icon" style="top:220px;left:40px" ondblclick="openApp('game')">
+<img src="https://img.icons8.com/color/64/controller.png"><br>Game
+</div>
+
+<div class="icon" style="top:310px;left:40px" ondblclick="openApp('notes')">
+<img src="https://img.icons8.com/color/64/notepad.png"><br>Notes
+</div>
+
+<div class="icon" style="top:400px;left:40px" ondblclick="openApp('trash')">
+<img src="https://img.icons8.com/color/64/recycle-bin.png"><br>Trash
+</div>
+
+<!-- WINDOWS -->
+<div id="chrome" class="window">
+<div class="titlebar">Chrome <span onclick="closeWin('chrome')">❌</span></div>
+<input class="search" placeholder="Search..." onkeypress="search(event)">
+</div>
+
+<div id="notes" class="window">
+<div class="titlebar">Notes <span onclick="closeWin('notes')">❌</span></div>
+<textarea style="width:100%;height:85%" oninput="saveNotes(this)"></textarea>
+</div>
+
+<div id="calc" class="window">
+<div class="titlebar">Calculator <span onclick="closeWin('calc')">❌</span></div>
+<div style="padding:10px">
+<input id="calcInput" style="width:100%;margin-bottom:10px">
+<button onclick="press('1')">1</button>
+<button onclick="press('2')">2</button>
+<button onclick="press('+')">+</button>
+<button onclick="press('-')">-</button>
+<button onclick="press('=')">=</button>
+</div>
+</div>
+
+<div id="game" class="window">
+<div class="titlebar">Game <span onclick="closeWin('game')">❌</span></div>
+<div id="gameBox"><div class="player" id="player"></div></div>
+</div>
+
+<div id="trash" class="window">
+<div class="titlebar">Trash <span onclick="closeWin('trash')">❌</span></div>
+<p style="padding:10px">Empty Bin</p>
+</div>
+
+<!-- START MENU -->
+<div id="startMenu">
+<div class="grid">
+
+<div onclick="openApp('chrome')">
+<img src="https://img.icons8.com/color/48/chrome--v1.png"><br>Chrome
+</div>
+
+<div onclick="openApp('calc')">
+<img src="https://img.icons8.com/color/48/calculator.png"><br>Calculator
+</div>
+
+<div onclick="openApp('game')">
+<img src="https://img.icons8.com/color/48/controller.png"><br>Game
+</div>
+
+<div onclick="openApp('notes')">
+<img src="https://img.icons8.com/color/48/notepad.png"><br>Notes
+</div>
+
+<div onclick="shutdown()">
+<img src="https://img.icons8.com/color/48/shutdown.png"><br>Shutdown
+</div>
+
+</div>
+</div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+
+<div onclick="toggleStart()">🪟</div>
+
+<input class="search" placeholder="Search...">
+
+<div class="apps">
+<img src="https://img.icons8.com/color/48/chrome--v1.png" onclick="openApp('chrome')">
+<img src="https://img.icons8.com/color/48/calculator.png" onclick="openApp('calc')">
+<img src="https://img.icons8.com/color/48/controller.png" onclick="openApp('game')">
+</div>
+
+<div class="right">
+<span>📶</span>
+<input type="range">
+<span id="battery">🔋</span>
+<span id="clock"></span>
+</div>
+
+</div>
+
+</div>
+
+<!-- JARVIS -->
+<div id="jarvis">
+<div class="jarvis-box">
+<b>JARVIS</b><br>Status: Online
+</div>
+</div>
+
+<!-- SHUTDOWN -->
+<div id="shutdown">
+<h2>Shutting Down...</h2>
+<div class="loader"></div>
+</div>
+
+<script>
+
+/* WALLPAPER */
+const wallpapers=[
+"https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+"https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d",
+"https://images.unsplash.com/photo-1470770841072-f978cf4d019e"
+];
+let currentWall=0;
+function setWallpaper(){
+document.getElementById("desktop").style.background=`url(${wallpapers[currentWall]}) center/cover`;
+}
+setWallpaper();
+
+/* CLOCK */
+setInterval(()=>{
+document.getElementById("clock").innerText=new Date().toLocaleTimeString();
+},1000);
+
+/* BATTERY */
+navigator.getBattery?.().then(b=>{
+function u(){document.getElementById("battery").innerText="🔋 "+Math.round(b.level*100)+"%"}
+u();b.addEventListener('levelchange',u);
+});
+
+/* APPS */
+function openApp(id){document.getElementById(id).style.display="block"}
+function closeWin(id){document.getElementById(id).style.display="none"}
+
+/* START MENU */
+function toggleStart(){
+let m=document.getElementById("startMenu");
+m.style.display=(m.style.display==="block")?"none":"block";
+}
+document.addEventListener("click",e=>{
+if(!e.target.closest("#startMenu") && !e.target.closest(".taskbar")){
+document.getElementById("startMenu").style.display="none";
+}
+});
+
+/* SEARCH */
+function search(e){
+if(e.key==="Enter")window.open("https://google.com/search?q="+e.target.value);
+}
+
+/* CALC */
+function press(v){
+let i=document.getElementById("calcInput");
+if(v==="=")i.value=eval(i.value);
+else i.value+=v;
+}
+
+/* NOTES */
+function saveNotes(el){localStorage.setItem("notes",el.value)}
+document.querySelector("textarea").value=localStorage.getItem("notes")||"";
+
+/* GAME */
+let p=document.getElementById("player");
+document.onkeydown=e=>{
+let x=p.offsetLeft,y=p.offsetTop;
+if(e.key=="w")p.style.top=y-10+"px";
+if(e.key=="s")p.style.top=y+10+"px";
+if(e.key=="a")p.style.left=x-10+"px";
+if(e.key=="d")p.style.left=x+10+"px";
+};
+
+/* SHUTDOWN */
+function shutdown(){
+document.getElementById("shutdown").style.display="flex";
+currentWall=(currentWall+1)%wallpapers.length;
+setWallpaper();
+setTimeout(()=>location.reload(),3000);
+}
+
+/* DRAG */
+let drag=false,win,ox,oy;
+document.querySelectorAll(".titlebar").forEach(bar=>{
+bar.onmousedown=e=>{
+drag=true;win=bar.parentElement;
+ox=e.offsetX;oy=e.offsetY;
+};
+});
+document.onmousemove=e=>{
+if(drag){
+win.style.left=e.pageX-ox+"px";
+win.style.top=e.pageY-oy+"px";
+}
+};
+document.onmouseup=()=>drag=false;
+
+</script>
+
+</body>
+</html>
